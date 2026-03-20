@@ -35,7 +35,10 @@ public class AIController : MonoBehaviour
 
       agent.SetDestination(target.position);
       animation.SetFloat("Speed",1);
-      cube.position = transform.position;
+      if (cube != null){
+          cube.position = transform.position;
+      }
+
 
     }
 }

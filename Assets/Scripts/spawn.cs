@@ -19,6 +19,7 @@ public class spawn : MonoBehaviour
             GameObject clone;
             clone = Instantiate(prefab);
             clone.GetComponent<AIController>().target = target;
+            target.GetComponent<TurtleAgent>().Goals.Add(clone);
             time = 0;
         }
     }

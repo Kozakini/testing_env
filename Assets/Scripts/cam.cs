@@ -16,8 +16,7 @@ public class cam : MonoBehaviour
     void Update()
     {
         Physics.Raycast(transform.position,target.position-transform.position, out hit, 10f,layerMask);
-        Debug.DrawRay(transform.position, target.position - transform.position, Color.red);
-        Debug.Log(hit.collider);
+
         if (hit.collider != null)
         {
             hit.collider.GetComponent<Renderer>().enabled = false;

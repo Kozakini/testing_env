@@ -4,6 +4,8 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using System.Collections;
 using Unity.AI.Navigation;
+using System.Linq;
+using System.Collections.Generic;
 
 /// <summary>
 /// This is the main agent script for the Turtle.
@@ -14,11 +16,19 @@ using Unity.AI.Navigation;
 /// </summary>
 public class TurtleAgent : Agent
 {
+    public float goalX;
+    public float goalZ;
+    public float distance;
+    public float distanceR;
+    public float distanceL;
 
     LayerMask layerMask;
     RaycastHit hit;
+    RaycastHit hitr;
+    RaycastHit hitl;
+    Transform closest;
     // The goal object that the turtle is trying to reach
-    [SerializeField] private Transform[] _goals;
+    public List<GameObject> Goals;
 
 
     // The ground object — we use its material to flash red or green
@@ -29,6 +39,7 @@ public class TurtleAgent : Agent
 
     // Reference to the turtle's Renderer — we use it to change color on wall collision
     private Renderer _renderer;
+
 
     // Ground's original color (so we can fade back to it after flashing red or green)
     private Color _defaultGroundColor;
@@ -51,7 +62,7 @@ public class TurtleAgent : Agent
     public override void Initialize()
     {
 
-        layerMask = LayerMask.GetMask("notwalka");
+
 
 
         _currentEposide = 0;
@@ -104,7 +115,9 @@ public class TurtleAgent : Agent
         UnityEngine.AI.NavMeshHit hit;
         bool isOnNavMesh = UnityEngine.AI.NavMesh.SamplePosition(new Vector3(goalPosition.x, 0.3f, goalPosition.z), out hit, 1.0f, UnityEngine.AI.NavMesh.AllAreas);
         // Set goal's new position
-        _goals[0].transform.position = hit.position;
+        Goals[0].transform.position = hit.position;
+
+
 
 
 
@@ -117,18 +130,32 @@ public class TurtleAgent : Agent
     /// </summary>
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Normalize all positions to stay between -1 and 1 for better learning
 
-        Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 30f, layerMask);
-        float goalX = _goals[0].localPosition.x / 5f;
-        float goalZ = _goals[0].localPosition.z / 5f;
+        // Normalize all positions to stay between -1 and 1 for better learning
+        Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 20f);
+        Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hitr, 20f);
+        Physics.Raycast(transform.position, transform.TransformDirection(Vector3.left), out hitl, 20f);
+
+        distance = hit.distance;
+        distanceR = hitr.distance;
+        distanceL = hitl.distance;
+        Debug.Log(hit.collider);
+        if (Goals.Count > 0)
+        {
+            closest = Goals.OrderBy(g => Vector3.Distance(transform.localPosition, g.transform.localPosition)).First().transform;
+            goalX = closest.transform.localPosition.x / 10f;
+            goalZ = closest.transform.localPosition.z / 10f;
+
+        }
 
         float agentX = transform.localPosition.x / 5f;
         float agentZ = transform.localPosition.z / 5f;
 
         float agentRotY = (transform.localRotation.eulerAngles.y / 360f) * 2f - 1f;
 
-        sensor.AddObservation(hit.distance);
+        sensor.AddObservation(distance);
+        sensor.AddObservation(distanceR);
+        sensor.AddObservation(distanceL);
         sensor.AddObservation(goalX);
         sensor.AddObservation(goalZ);
         sensor.AddObservation(agentX);
@@ -198,12 +225,18 @@ public class TurtleAgent : Agent
         {
 
             GoalReached();
-            foreach (GameObject zombie in GameObject.FindGameObjectsWithTag("Enemy"))
-            {
-                Destroy(zombie);
+
+            for (int i = Goals.Count-1; i >= 1; i--){
+
+                Destroy(Goals[i]);
+                Goals.RemoveAt(i);
             }
 
-        }
+
+            }
+
+
+
     }
 
     private void OnCollisionEnter(Collision collision)

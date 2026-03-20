@@ -20,8 +20,7 @@ public class camera : MonoBehaviour
         transform.position = offset + target.position;
 
         Physics.Raycast(transform.position,target.position-transform.position, out hit, 10000f);
-        Debug.DrawRay(transform.position, target.position - transform.position, Color.red);
-        Debug.Log(hit.collider);
+
         if (hit.collider != null)
         {
             hit.collider.gameObject.SetActive(false);
