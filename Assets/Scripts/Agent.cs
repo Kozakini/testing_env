@@ -82,7 +82,7 @@ public class TurtleAgent : Agent
 
 
     }
- /// <summary>
+    /// <summary>
     /// Coroutine to flash the ground a color and fade it back to original
     /// </summary>
 
@@ -139,17 +139,17 @@ public class TurtleAgent : Agent
     /// <summary>
     /// Allows keyboard control for testing the agent manually
     /// </summary>
-public override void Heuristic(in ActionBuffers actionsOut)
-{
-    var discreteActions = actionsOut.DiscreteActions;
-    discreteActions[0] = 0;
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var discreteActions = actionsOut.DiscreteActions;
+        discreteActions[0] = 0;
 
 #if ENABLE_LEGACY_INPUT_MANAGER
     if (Input.GetKey(KeyCode.UpArrow)) discreteActions[0] = 1;
     else if (Input.GetKey(KeyCode.LeftArrow)) discreteActions[0] = 2;
     else if (Input.GetKey(KeyCode.RightArrow)) discreteActions[0] = 3;
 #endif
-}
+    }
 
     /// <summary>
     /// Called every time the agent takes an action
@@ -157,11 +157,12 @@ public override void Heuristic(in ActionBuffers actionsOut)
     public override void OnActionReceived(ActionBuffers actions)
     {
         MoveAgent(actions.DiscreteActions);
-        if (hit.distance < 5f){
+        if (hit.distance < 5f)
+        {
             AddReward(-0.001f);
         }
 
-        AddReward(+1f/20000f);
+        AddReward(+1f / 20000f);
 
         // Optional: Track cumulative reward for debugging
         _cumulativeReward = GetCumulativeReward();
@@ -197,6 +198,11 @@ public override void Heuristic(in ActionBuffers actionsOut)
         {
 
             GoalReached();
+            foreach (GameObject zombie in GameObject.FindGameObjectsWithTag("Enemy"))
+            {
+                Destroy(zombie);
+            }
+
         }
     }
 
